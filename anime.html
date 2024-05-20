@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Data Showcase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .anime-card {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    }
+    .anime-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .anime-details {
+      margin-top: 10px;
+    }
+    .anime-detail {
+      margin-bottom: 5px;
+    }
+    .pagination {
+      margin-top: 20px;
+    }
+    .anime-image {
+      max-width: 100px;
+      margin-right: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Anime Data Showcase</h1>
+  <div id="anime-list"></div>
+  <div class="pagination">
+    <button onclick="loadPreviousPage()">Previous Page</button>
+    <button onclick="loadNextPage()">Next Page</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  let currentPage = 1;
+
+  const fetchAnimeData = async () => {
+    try {
+      const response = await axios.get(`https://kitsu.io/api/edge/anime?page[limit]=20&page[offset]=${(currentPage - 1) * 20}`);
+      console.log(response);
+      const animeList = response.data.data;
+      renderAnimeList(animeList);
+    } catch (error) {
+      console.error('Error fetching anime data:', error.message);
+    }
+  };
+
+  const renderAnimeList = (animeList) => {
+    const animeListDiv = document.getElementById('anime-list');
+    animeListDiv.innerHTML = '';
+
+    animeList.forEach(anime => {
+      const animeCard = document.createElement('div');
+      animeCard.classList.add('anime-card');
+
+      const image = document.createElement('img');
+      image.classList.add('anime-image');
+      image.src = anime.attributes.posterImage.small;
+      animeCard.appendChild(image);
+
+      const title = document.createElement('div');
+      title.classList.add('anime-title');
+      title.textContent = anime.attributes.canonicalTitle;
+      animeCard.appendChild(title);
+
+      const details = document.createElement('div');
+      details.classList.add('anime-details');
+      details.innerHTML = `
+        <div class="anime-detail">ID: ${anime.id}</div>
+        <div class="anime-detail">Rank: ${anime.attributes.popularityRank}</div>
+      `;
+      animeCard.appendChild(details);
+
+      animeListDiv.appendChild(animeCard);
+    });
+  };
+
+  const loadNextPage = () => {
+    currentPage++;
+    fetchAnimeData();
+  };
+
+  const loadPreviousPage = () => {
+    if (currentPage > 1) {
+      currentPage--;
+      fetchAnimeData();
+    }
+  };
+
+  window.onload = fetchAnimeData;
+</script>
+
+</body>
+</html>
